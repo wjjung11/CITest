@@ -1,0 +1,126 @@
+#!/bin/bash
+
+sudo ufw disable
+sudo apt-get -q -y update
+sudo apt-get install -qqy git
+sudo apt-get install -q -y python-pip
+# sudo pip install -q netaddr
+
+devstack_branch="<%= @devstack_branch %>"
+git clone https://github.com/openstack-dev/devstack.git -b $devstack_branch
+
+cd devstack
+ 
+# When creating the stack deployment for the first time,
+# you are going to see prompts for multiple passwords.
+# Your results will be stored in the localrc file.
+# If you wish to bypass this, and provide the passwords up front,
+# add in the following lines with your own password to the localrc file
+echo '# Miniml Contents' > localrc
+echo ADMIN_PASSWORD=<%= @localrc_admin_password %> >> localrc
+echo MYSQL_PASSWORD=<%= @localrc_mysql_password %> >> localrc
+echo RABBIT_PASSWORD=<%= @localrc_rabbit_password %> >> localrc
+echo SERVICE_PASSWORD=<%= @localrc_service_password %> >> localrc
+echo SERVICE_TOKEN=<%= @localrc_service_token %> >> localrc
+echo "" >> localrc 
+
+# Optionally alter HEAT_REPO to use a fork.
+#echo HEAT_REPO=https://github.com/sjcorbett/heat.git >> localrc
+#echo HEAT_BRANCH=master >> localrc
+
+echo '# Branches' >> localrc
+echo NOVA_BRANCH=<%= @localrc_nova_branch %> >> localrc
+echo CINDER_BRANCH=<%= @localrc_cinder_branch %> >> localrc
+echo GLANCE_BRANCH=<%= @localrc_glance_branch %> >> localrc
+echo HORIZON_BRANCH=<%= @localrc_horizon_branch %> >> localrc
+echo KEYSTONE_BRANCH=<%= @localrc_keystone_branch %> >> localrc
+echo NEUTRON_BRANCH=<%= @localrc_neutron_branch %> >> localrc
+echo SWIFT_BRANCH=<%= @localrc_swift_branch %> >> localrc
+echo TEMPEST_BRANCH=<%= @localrc_tempest_branch %> >> localrc
+echo "" >> localrc
+
+HOST_IP=<%= @ipaddress_eth1 %>
+echo HOST_IP=$HOST_IP >> localrc
+echo SERVICE_HOST=$HOST_IP >> localrc
+echo MYSQL_HOST=$HOST_IP >> localrc
+echo RABBIT_HOST=$HOST_IP >> localrc
+echo Q_HOST=$HOST_IP >> localrc
+echo GLANCE_HOST=$HOST_IP >> localrc
+echo G_HOST=$HOST_IP >> localrc
+echo GLANCE_HOSTPORT=$HOST_IP:9292 >> localrc
+echo FLAT_INTERFACE=<%= @localrc_flat_interface %> >> localrc
+echo PUBLIC_NETWORK_GATEWAY=<%= @localrc_public_network_gateway %> >> localrc
+echo Q_FLOATING_ALLOCATION_POOL=<%= @localrc_q_floating_allocation_pool %> >> localrc
+echo FLOATING_RANGE=<%= @localrc_floating_range %> >> localrc
+echo PUBLIC_INTERFACE=<%= @localrc_public_interface %> >> localrc
+echo NETWORK_GATEWAY=<%= @localrc_network_gateway %> >> localrc
+echo FIXED_RANGE=<%= @localrc_fixed_range %> >> localrc
+
+<% if @localrc_neutron_service == "true" %>
+echo DISABLE_SERVICE=n-net >> localrc
+echo ENABLED_SERVICES+=,neutron,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-metering,q-vpn,q-fwaas >> localrc
+<% else %>
+echo ENAABLE_SERVICE=n-net >> localrc
+<% end %>
+
+#echo ENABLED_SERVICES+=,swift >> localrc
+echo ENABLED_SERVICES+=,tempest >> localrc
+
+<% if @localrc_heat_service == "true" %>
+echo ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng >> localrc
+<% else %>
+<% end %>
+
+echo ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-anotification,ceilometer-collector,ceilometer-api >> localrc
+#echo ceilometer-alarm-notifier,ceilometer-alarm-evaluator >> localrc
+
+echo SWIFT_HASH=<%= @localrc_swift_hash %> >> localrc
+echo API_RATE_LIMIT=<%= @localrc_api_rate_limit %> >> localrc
+## It would also be useful to automatically download and register VM images that Heat can launch.
+# 64bit image (~660MB)
+#echo IMAGE_URLS+=",http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F17-x86_64-cfntools.qcow2" >> localrc
+#echo IMAGE_URLS+=",http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F18-x86_64-cfntools.qcow2" >> localrc
+# 32bit image (~640MB)
+#echo IMAGE_URLS+=",http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F17-i386-cfntools.qcow2" >> localrc
+#echo IMAGE_URLS+=",http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F18-i386-cfntools.qcow2" >> localrc
+#echo IMAGE_URLS+=",http://cloud-images.ubuntu.com/releases/precise/release/ubuntu-12.04-server-cloudimg-amd64-disk1.img" >> localrc
+
+source localrc
+
+echo '# Enable Logging'
+echo LOGFILE=stacklog.txt >> stackrc
+echo VERBOSE=True >> stackrc
+echo LOG_COLOR=True >> stackrc
+echo SCREEN_LOGDIR=/opt/stack/logs >> stackrc
+source stackrc
+
+# This installs Devstack. It takes a long time (20-30 minutes)
+./stack.sh
+
+<% if @localrc_neutron_service == "true" %>
+sudo ovs-vsctl add-port br-ex <%= @localrc_public_interface %>
+sudo sh -c "sed -i 's/exit 0/ovs-vsctl add-port br-ex <%= @localrc_public_interface %>/' /etc/rc.local"
+sudo sh -c "route add -net 0.0.0.0 netmask 0.0.0.0 gw 192.168.1.1 br-ex"
+sudo sh -c "echo 'route add -net 0.0.0.0 netmask 0.0.0.0 gw 192.168.1.1 br-ex' >> /etc/rc.local"
+sudo sh -c "echo 'exit 0' >> /etc/rc.local"
+sudo sh -c "iptables -t nat -S|grep '169'|cut -d ' ' -f 2|xargs -i iptables -t nat -D {} 1"
+<% end %>
+
+sudo virsh net-destroy default
+sudo virsh net-autostart --disable default
+ 
+cd devstack
+# Now use the user demo to perform some actions :
+source openrc demo demo
+# Creates a security group named default and add rules to it :
+nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+nova secgroup-add-rule default tcp 80 80 0.0.0.0/0
+nova secgroup-list-rules default
+ 
+sudo sh -c "echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf"
+sudo sysctl -p
+
+echo "========= END ================================="
+
+exit

@@ -1,0 +1,20 @@
+deb http://ftp.daum.net/ubuntu/ precise main restricted
+deb-src http://ftp.daum.net/ubuntu/ precise main restricted
+deb http://ftp.daum.net/ubuntu/ precise-updates main restricted
+deb-src http://ftp.daum.net/ubuntu/ precise-updates main restricted
+deb http://ftp.daum.net/ubuntu/ precise universe
+deb-src http://ftp.daum.net/ubuntu/ precise universe
+deb http://ftp.daum.net/ubuntu/ precise-updates universe
+deb-src http://ftp.daum.net/ubuntu/ precise-updates universe
+deb http://ftp.daum.net/ubuntu/ precise multiverse
+deb-src http://ftp.daum.net/ubuntu/ precise multiverse
+deb http://ftp.daum.net/ubuntu/ precise-updates multiverse
+deb-src http://ftp.daum.net/ubuntu/ precise-updates multiverse
+deb http://ftp.daum.net/ubuntu/ precise-backports main restricted universe multiverse
+deb-src http://ftp.daum.net/ubuntu/ precise-backports main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu precise-security main restricted
+deb-src http://security.ubuntu.com/ubuntu precise-security main restricted
+deb http://security.ubuntu.com/ubuntu precise-security universe
+deb-src http://security.ubuntu.com/ubuntu precise-security universe
+deb http://security.ubuntu.com/ubuntu precise-security multiverse
+deb-src http://security.ubuntu.com/ubuntu precise-security multiverse

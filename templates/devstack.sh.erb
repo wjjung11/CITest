@@ -102,6 +102,16 @@ sudo ovs-vsctl add-port br-ex <%= @localrc_public_interface %>
 sudo sh -c "sed -i 's/exit 0/ovs-vsctl add-port br-ex <%= @localrc_public_interface %>/' /etc/rc.local"
 sudo sh -c "route add -net 0.0.0.0 netmask 0.0.0.0 gw 192.168.1.1 br-ex"
 sudo sh -c "echo 'route add -net 0.0.0.0 netmask 0.0.0.0 gw 192.168.1.1 br-ex' >> /etc/rc.local"
+#김동현: 192.168.3.1
+#정정인: 192.168.5.1
+#이승익: 192.168.7.1
+#박찬웅: 192.168.9.1
+#허의  : 192.168.13.1
+#김용우: 192.168.15.1
+#염기윤: 192.168.17.1
+#노승훈: 192.168.19.1
+#장혜천: 192.168.21.1
+
 sudo sh -c "echo 'exit 0' >> /etc/rc.local"
 sudo sh -c "iptables -t nat -S|grep '169'|cut -d ' ' -f 2|xargs -i iptables -t nat -D {} 1"
 <% end %>

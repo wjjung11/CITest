@@ -32,10 +32,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # your network.
   # eth0¢¯ ¢¯¢¯¢¯. (Vagrant ¢¯¢¯ ¢¯¢¯)
   config.vm.network :public_network, ip: "192.168.0.4" #eth1
-<<<<<<< HEAD
-  config.vm.network :public_network, ip: "0.0.0.0" #eth2
-
-=======
   #¿¿¿: 192.168.2.X
   #¿¿¿: 192.168.4.X
   #¿¿¿: 192.168.6.X
@@ -47,7 +43,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #¿¿¿: 192.168.20.X
 
   config.vm.network :public_network, ip: "0.0.0.0" #eth2
->>>>>>> e56ed12... added IP allocation for Team
   config.vm.hostname = "devstack-neutron"
 
   # If true, then any SSH connections made will enable agent forwarding.
@@ -69,13 +64,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.gui = false
     # Use VBoxManage to customize the VM. For example to change memory:
     vb.customize ["modifyvm", :id, "--cpus", "4"]
-<<<<<<< HEAD
-    #vb.customize ["modifyvm", :id, "--memory", "2048"]
-    vb.customize ["modifyvm", :id, "--memory", "4096"]
-=======
     vb.customize ["modifyvm", :id, "--memory", "4096"]
     #vb.customize ["modifyvm", :id, "--memory", "2048"]
->>>>>>> e56ed12... added IP allocation for Team
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
   end
   #
@@ -126,10 +116,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "localrc_host_ip_iface" => "eth1",
       "localrc_public_interface" => "eth2",
       "localrc_public_network_gateway" => "192.168.1.4",
-<<<<<<< HEAD
-      "localrc_floating_range" => "192.168.1.0/24",
-      "localrc_q_floating_allocation_pool" => "start=192.168.1.101,end=192.168.1.200",
-=======
 	#¿¿¿: 192.168.3.X
 	#¿¿¿: 192.168.5.X
 	#¿¿¿: 192.168.7.X
@@ -162,7 +148,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	#¿¿¿: "start=192.168.19.101,end=192.168.19.200",
 	#¿¿¿: "start=192.168.21.101,end=192.168.21.200",
 
->>>>>>> e56ed12... added IP allocation for Team
       "localrc_network_gateway" => "10.0.0.1",
       "localrc_fixed_range" => "10.0.0.0/24",
       "localrc_flat_interface" => "eth2",
